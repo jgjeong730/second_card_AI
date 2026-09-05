@@ -161,13 +161,13 @@ function Interview() {
                 >
                   경력기술서 만들기 →
                 </button>
-                <button
-                  type="button"
+                <Link
+                  to="/finance"
+                  state={{ name: displayName }}
                   className="btn btn--outline"
-                  onClick={() => alert('재무 대시보드 만들기 기능은 준비 중입니다.')}
                 >
                   재무 대시보드 만들기 →
-                </button>
+                </Link>
                 <button
                   type="button"
                   className="btn btn--outline"
