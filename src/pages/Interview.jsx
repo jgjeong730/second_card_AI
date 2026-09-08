@@ -41,8 +41,13 @@ function Interview() {
   const [answers, setAnswers] = useState(Array(QUESTIONS.length).fill(''))
   const [questionIndex, setQuestionIndex] = useState(0)
   const [aiResult, setAiResult] = useState(null)
+  const [facts, setFacts] = useState({ jobTitle: '', years: '', pension: '' })
 
   const displayName = name.trim() || '회원'
+
+  function handleFactChange(field, value) {
+    setFacts((prev) => ({ ...prev, [field]: value }))
+  }
 
   function handleAnswerChange(value) {
     setAnswers((prev) => {
@@ -173,17 +178,69 @@ function Interview() {
               <p className="assets-caption">
                 이 키워드들이 당신의 경력기술서, 재무 대시보드, 명함 문구의 재료가 됩니다
               </p>
+            </div>
+
+            <div className="card">
+              <h2>구체적인 사실 몇 가지만 확인할게요</h2>
+              <p className="assets-caption">
+                이야기만으로는 알 수 없는 정보예요. 채워주시면 경력기술서와 재무 대시보드가 실제
+                숫자로 완성됩니다 — 건너뛰어도 괜찮아요.
+              </p>
+              <label htmlFor="fact-job" className="field-label">
+                최근 직장·직무
+              </label>
+              <input
+                id="fact-job"
+                type="text"
+                className="text-input"
+                placeholder="예: OO회사 마케팅팀장"
+                value={facts.jobTitle}
+                onChange={(e) => handleFactChange('jobTitle', e.target.value)}
+              />
+              <label htmlFor="fact-years" className="field-label">
+                재직 연차
+              </label>
+              <input
+                id="fact-years"
+                type="text"
+                inputMode="numeric"
+                className="text-input"
+                placeholder="예: 15"
+                value={facts.years}
+                onChange={(e) => handleFactChange('years', e.target.value)}
+              />
+              <label htmlFor="fact-pension" className="field-label">
+                월 예상 연금 수령액(만원)
+              </label>
+              <input
+                id="fact-pension"
+                type="text"
+                inputMode="numeric"
+                className="text-input"
+                placeholder="예: 150"
+                value={facts.pension}
+                onChange={(e) => handleFactChange('pension', e.target.value)}
+              />
+            </div>
+
+            <div className="card">
               <div className="asset-actions">
                 <button
                   type="button"
                   className="btn btn--outline"
-                  onClick={() => alert('경력기술서 만들기 기능은 준비 중입니다.')}
+                  onClick={() =>
+                    alert(
+                      facts.jobTitle.trim()
+                        ? `"${facts.jobTitle.trim()}" 경력이 확인되었습니다. 경력기술서 생성 기능은 준비 중입니다.`
+                        : '경력기술서 만들기 기능은 준비 중입니다.',
+                    )
+                  }
                 >
                   경력기술서 만들기 →
                 </button>
                 <Link
                   to="/finance"
-                  state={{ name: displayName }}
+                  state={{ name: displayName, pension: facts.pension }}
                   className="btn btn--outline"
                 >
                   재무 대시보드 만들기 →
