@@ -41,7 +41,12 @@ function Interview() {
   const [answers, setAnswers] = useState(Array(QUESTIONS.length).fill(''))
   const [questionIndex, setQuestionIndex] = useState(0)
   const [aiResult, setAiResult] = useState(null)
-  const [facts, setFacts] = useState({ jobTitle: '', years: '', pension: '' })
+  const [facts, setFacts] = useState({
+    jobTitle: '',
+    years: '',
+    pension: '',
+    preRetirementIncome: '',
+  })
 
   const displayName = name.trim() || '회원'
 
@@ -221,6 +226,18 @@ function Interview() {
                 value={facts.pension}
                 onChange={(e) => handleFactChange('pension', e.target.value)}
               />
+              <label htmlFor="fact-income" className="field-label">
+                은퇴 전 월 평균 소득(만원)
+              </label>
+              <input
+                id="fact-income"
+                type="text"
+                inputMode="numeric"
+                className="text-input"
+                placeholder="예: 350"
+                value={facts.preRetirementIncome}
+                onChange={(e) => handleFactChange('preRetirementIncome', e.target.value)}
+              />
             </div>
 
             <div className="card">
@@ -240,7 +257,11 @@ function Interview() {
                 </button>
                 <Link
                   to="/finance"
-                  state={{ name: displayName, pension: facts.pension }}
+                  state={{
+                    name: displayName,
+                    pension: facts.pension,
+                    preRetirementIncome: facts.preRetirementIncome,
+                  }}
                   className="btn btn--outline"
                 >
                   재무 대시보드 만들기 →

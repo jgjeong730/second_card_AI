@@ -270,6 +270,13 @@
   margin-bottom: 6px;
 }
 
+.dash-formula {
+  color: var(--text-muted);
+  font-size: 15px;
+  font-family: ui-monospace, Consolas, monospace;
+  margin-bottom: 12px;
+}
+
 .dash-total {
   text-align: right;
   font-size: 19px;

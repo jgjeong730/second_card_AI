@@ -17,6 +17,8 @@ const ASSET_ITEMS = [
 const MOCK_PENSION_TOTAL = PENSION_ITEMS.reduce((sum, item) => sum + item.amount, 0)
 const TARGET_EXPENSE = 230
 const TOTAL_ASSET = ASSET_ITEMS.reduce((sum, item) => sum + item.amount, 0)
+const REPLACEMENT_RATE_MIN = 40
+const REPLACEMENT_RATE_MAX = 60
 
 function FinanceDashboard() {
   const location = useLocation()
@@ -26,6 +28,20 @@ function FinanceDashboard() {
   const hasUserPension = Number.isFinite(userPension) && userPension > 0
   const pensionTotal = hasUserPension ? userPension : MOCK_PENSION_TOTAL
   const coverageRate = Math.round((pensionTotal / TARGET_EXPENSE) * 100)
+
+  const preRetirementIncome = Number(location.state?.preRetirementIncome)
+  const hasReplacementInputs =
+    hasUserPension && Number.isFinite(preRetirementIncome) && preRetirementIncome > 0
+  const replacementRate = hasReplacementInputs
+    ? Math.round((pensionTotal / preRetirementIncome) * 100)
+    : null
+  const replacementVerdict = hasReplacementInputs
+    ? replacementRate < REPLACEMENT_RATE_MIN
+      ? '권장 범위보다 낮습니다'
+      : replacementRate > REPLACEMENT_RATE_MAX
+        ? '권장 범위보다 높습니다'
+        : '권장 범위 안에 있습니다'
+    : null
 
   return (
     <div className="page">
@@ -73,6 +89,39 @@ function FinanceDashboard() {
           <p className="dash-total">
             합계 <strong>{pensionTotal}만원 / 월</strong>
           </p>
+        </div>
+
+        <div className="card">
+          <h2>소득대체율</h2>
+          {hasReplacementInputs ? (
+            <>
+              <p className="dash-formula">
+                계산식: 예상 월 연금({pensionTotal}만원) ÷ 은퇴 전 월 소득({preRetirementIncome}
+                만원) × 100
+              </p>
+              <div className="progress-bar progress-bar--large">
+                <div
+                  className="progress-bar__fill"
+                  style={{ width: `${Math.min(replacementRate, 100)}%` }}
+                />
+              </div>
+              <p className="progress-label progress-label--left">
+                <strong>{replacementRate}%</strong> — {replacementVerdict}
+              </p>
+              <p>
+                재무설계 업계에서 일반적으로 권장하는 적정 소득대체율은{' '}
+                {REPLACEMENT_RATE_MIN}~{REPLACEMENT_RATE_MAX}%입니다. 이 수치는 개인 상황에
+                따라 다르게 적용될 수 있는 일반적인 기준이며, 정확한 판단은 전문 재무 상담을
+                권장합니다.
+              </p>
+            </>
+          ) : (
+            <p>
+              인터뷰의 "구체적인 사실" 단계에서 예상 연금과 은퇴 전 월 소득을 모두 입력하면,
+              소득대체율(예상 연금 ÷ 은퇴 전 소득 × 100)을 계산해 권장 범위(
+              {REPLACEMENT_RATE_MIN}~{REPLACEMENT_RATE_MAX}%)와 비교해 드립니다.
+            </p>
+          )}
         </div>
 
         <div className="card">
