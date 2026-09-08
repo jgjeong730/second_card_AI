@@ -242,19 +242,19 @@ function Interview() {
 
             <div className="card">
               <div className="asset-actions">
-                <button
-                  type="button"
+                <Link
+                  to="/resume"
+                  state={{
+                    name: displayName,
+                    jobTitle: facts.jobTitle,
+                    years: facts.years,
+                    careerBullets: aiResult?.career_bullets ?? [],
+                    careerFacts: aiResult?.career_facts ?? [],
+                  }}
                   className="btn btn--outline"
-                  onClick={() =>
-                    alert(
-                      facts.jobTitle.trim()
-                        ? `"${facts.jobTitle.trim()}" 경력이 확인되었습니다. 경력기술서 생성 기능은 준비 중입니다.`
-                        : '경력기술서 만들기 기능은 준비 중입니다.',
-                    )
-                  }
                 >
                   경력기술서 만들기 →
-                </button>
+                </Link>
                 <Link
                   to="/finance"
                   state={{
@@ -266,13 +266,20 @@ function Interview() {
                 >
                   재무 대시보드 만들기 →
                 </Link>
-                <button
-                  type="button"
+                <Link
+                  to="/card"
+                  state={{
+                    name: displayName,
+                    jobTitle: facts.jobTitle,
+                    taglineOptions: aiResult?.card_tagline_options ?? [],
+                    keywords: aiResult
+                      ? (aiResult.identity_keywords ?? [])
+                      : foundTags.map((t) => t.replace(/^#/, '')),
+                  }}
                   className="btn btn--outline"
-                  onClick={() => alert('명함 문구 만들기 기능은 준비 중입니다.')}
                 >
                   명함 문구 만들기 →
-                </button>
+                </Link>
               </div>
             </div>
           </>

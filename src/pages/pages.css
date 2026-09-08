@@ -148,6 +148,12 @@
   border-color: var(--accent);
 }
 
+.btn--small {
+  padding: 10px 20px;
+  font-size: 16px;
+  min-height: 44px;
+}
+
 .interview {
   max-width: 640px;
   padding-top: 32px;
@@ -347,4 +353,32 @@
 
 .cta-card {
   text-align: center;
+}
+
+.business-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.business-card__name {
+  font-size: 17px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.business-card__tagline {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.business-card__job {
+  font-size: 16px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
 }
