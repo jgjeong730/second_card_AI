@@ -2,6 +2,11 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import './pages.css'
 
+// Only reachable when the presenter runs `npm start` in /server on their own
+// machine (see server/README.md). Otherwise this fails fast and the static
+// template below is used instead — the deployed demo never depends on it.
+const LOCAL_AI_SERVER_URL = 'http://localhost:8787/api/manuscript'
+
 const QUESTIONS = [
   {
     prompt: '어린 시절 가장 기억에 남는 장면은 무엇인가요?',
@@ -35,6 +40,7 @@ function Interview() {
   const [name, setName] = useState('')
   const [answers, setAnswers] = useState(Array(QUESTIONS.length).fill(''))
   const [questionIndex, setQuestionIndex] = useState(0)
+  const [aiResult, setAiResult] = useState(null)
 
   const displayName = name.trim() || '회원'
 
@@ -46,16 +52,19 @@ function Interview() {
     })
   }
 
-  function handleNext() {
+  async function handleNext() {
     if (questionIndex < QUESTIONS.length - 1) {
       setQuestionIndex((i) => i + 1)
-    } else {
-      setStep('done')
+      return
     }
+    setStep('generating')
+    const result = await generateWithLocalAI(displayName, answers)
+    setAiResult(result)
+    setStep('done')
   }
 
   function handleDownload() {
-    const text = buildManuscript(displayName, answers)
+    const text = aiResult?.manuscript || buildManuscript(displayName, answers)
     const blob = new Blob([text], { type: 'text/plain;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -65,9 +74,13 @@ function Interview() {
     URL.revokeObjectURL(url)
   }
 
-  const foundTags = QUESTIONS.filter((_, i) => answers[i].trim().length > 0).map(
-    (q) => q.tag,
-  )
+  const chapters =
+    aiResult?.chapters ??
+    QUESTIONS.map((q, i) => ({ title: q.chapter, body: answers[i].trim() || '(답변 없음)' }))
+
+  const foundTags = aiResult
+    ? (aiResult.identity_keywords ?? []).map((k) => `#${k.replace(/\s+/g, '')}`)
+    : QUESTIONS.filter((_, i) => answers[i].trim().length > 0).map((q) => q.tag)
 
   return (
     <div className="page">
@@ -126,14 +139,21 @@ function Interview() {
           </div>
         )}
 
+        {step === 'generating' && (
+          <div className="card">
+            <h1>{displayName}님의 이야기를 다듬고 있습니다</h1>
+            <p>잠시만 기다려 주세요.</p>
+          </div>
+        )}
+
         {step === 'done' && (
           <>
             <div className="card manuscript">
               <h1>{displayName}님의 이야기</h1>
-              {QUESTIONS.map((q, i) => (
-                <div key={q.chapter} className="chapter">
-                  <h2>{q.chapter}</h2>
-                  <p>{answers[i].trim() || '(답변 없음)'}</p>
+              {chapters.map((c) => (
+                <div key={c.title} className="chapter">
+                  <h2>{c.title}</h2>
+                  <p>{c.body}</p>
                 </div>
               ))}
               <button type="button" className="btn btn--secondary" onClick={handleDownload}>
@@ -182,6 +202,27 @@ function Interview() {
       </div>
     </div>
   )
+}
+
+async function generateWithLocalAI(name, answers) {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 20000)
+  try {
+    const res = await fetch(LOCAL_AI_SERVER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, answers }),
+      signal: controller.signal,
+    })
+    if (!res.ok) return null
+    const data = await res.json()
+    if (!Array.isArray(data.chapters) || !data.manuscript) return null
+    return data
+  } catch {
+    return null
+  } finally {
+    clearTimeout(timeout)
+  }
 }
 
 function buildManuscript(name, answers) {
